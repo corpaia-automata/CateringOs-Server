@@ -1,0 +1,28 @@
+{% extends "base_pdf.html" %}
+{% block content %}
+<h2>Grocery List — {{ event.name }}</h2>
+<p>Event Date: {{ event.event_date }} | Guests: {{ event.guest_count }}</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Ingredient</th>
+            <th>Category</th>
+            <th>Required Qty</th>
+            <th>Unit</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in ingredients %}
+        <tr>
+            <td>{{ item.ingredient.name }}</td>
+            <td>{{ item.ingredient.category }}</td>
+            <td>{{ item.required_quantity }}</td>
+            <td>{{ item.ingredient.unit }}</td>
+            <td>{{ item.notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
