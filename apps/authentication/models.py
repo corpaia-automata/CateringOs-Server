@@ -1,9 +1,14 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from shared.mixins import BaseMixin
+from shared.mixins import ActiveManager, BaseMixin
 
 
-class UserManager(BaseUserManager):
+class UserManager(ActiveManager, BaseUserManager):
+    """
+    Custom manager: inherits soft-delete filtering from ActiveManager
+    and provides create_user / create_superuser.
+    """
+
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Email is required')
@@ -16,14 +21,22 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', User.Role.ADMIN)
         return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseMixin):
+
+    class Role(models.TextChoices):
+        ADMIN = 'ADMIN', 'Admin'
+        MANAGER = 'MANAGER', 'Manager'
+        STAFF = 'STAFF', 'Staff'
+
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=20, blank=True)
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.STAFF)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
