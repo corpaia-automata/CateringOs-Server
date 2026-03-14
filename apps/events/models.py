@@ -16,8 +16,9 @@ class Event(BaseMixin):
 
     class ServiceType(models.TextChoices):
         BUFFET        = 'BUFFET',        'Buffet'
+        BOX_COUNTER   = 'BOX_COUNTER',   'Box Counter'
         TABLE_SERVICE = 'TABLE_SERVICE', 'Table Service'
-        DELIVERY      = 'DELIVERY',      'Delivery'
+        OTHER         = 'OTHER',         'Other'
 
     class Status(models.TextChoices):
         DRAFT       = 'DRAFT',       'Draft'
@@ -26,18 +27,28 @@ class Event(BaseMixin):
         COMPLETED   = 'COMPLETED',   'Completed'
         CANCELLED   = 'CANCELLED',   'Cancelled'
 
-    event_code     = models.CharField(max_length=30, unique=True, editable=False)
-    customer_name  = models.CharField(max_length=255)
-    contact_number = models.CharField(max_length=20, blank=True)
-    event_type     = models.CharField(max_length=100)
-    event_date     = models.DateField(db_index=True)
-    event_time     = models.TimeField(null=True, blank=True)
-    venue          = models.CharField(max_length=255, blank=True)
-    guest_count    = models.PositiveIntegerField()
-    service_type   = models.CharField(max_length=15, choices=ServiceType.choices)
-    status         = models.CharField(max_length=15, choices=Status.choices, default=Status.DRAFT)
-    menu_locked    = models.BooleanField(default=False)
-    notes          = models.TextField(blank=True)
+    class PaymentStatus(models.TextChoices):
+        ADVANCE_PAID = 'ADVANCE_PAID', 'Advance Paid'
+        PARTIAL      = 'PARTIAL',      'Partial'
+        PENDING      = 'PENDING',      'Pending'
+        FULLY_PAID   = 'FULLY_PAID',   'Fully Paid'
+
+    event_code              = models.CharField(max_length=30, unique=True, editable=False)
+    customer_name           = models.CharField(max_length=255)
+    contact_number          = models.CharField(max_length=20, blank=True)
+    event_type              = models.CharField(max_length=100, blank=True)
+    event_date              = models.DateField(db_index=True, null=True, blank=True)
+    event_time              = models.TimeField(null=True, blank=True)
+    venue                   = models.CharField(max_length=255, blank=True)
+    guest_count             = models.PositiveIntegerField()
+    service_type            = models.CharField(max_length=15, choices=ServiceType.choices)
+    service_type_narration  = models.CharField(max_length=255, blank=True)
+    status                  = models.CharField(max_length=15, choices=Status.choices, default=Status.DRAFT)
+    payment_status          = models.CharField(max_length=15, choices=PaymentStatus.choices, blank=True)
+    total_amount            = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    advance_amount          = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    menu_locked             = models.BooleanField(default=False)
+    notes                   = models.TextField(blank=True)
 
     class Meta:
         db_table = 'events'
