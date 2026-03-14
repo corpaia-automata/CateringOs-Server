@@ -1,0 +1,600 @@
+{
+  "info": {
+    "name": "CateringOS API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "inquiry_id", "value": "" },
+    { "key": "event_id", "value": "" },
+    { "key": "ingredient_id", "value": "" },
+    { "key": "dish_id", "value": "" },
+    { "key": "menu_item_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/register/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\": \"Admin\", \"last_name\": \"User\", \"email\": \"admin@catering.com\", \"password\": \"Admin@1234\", \"password_confirm\": \"Admin@1234\"}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.access);",
+                  "pm.collectionVariables.set('refresh_token', json.refresh);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@catering.com\", \"password\": \"Admin@1234\"}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/refresh/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refresh\": \"{{refresh_token}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/auth/logout/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refresh\": \"{{refresh_token}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Me - Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/auth/me/"
+          }
+        },
+        {
+          "name": "Me - Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/auth/me/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\": \"Super\", \"phone\": \"9876543210\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inquiries",
+      "item": [
+        {
+          "name": "List Inquiries",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/inquiries/"
+          }
+        },
+        {
+          "name": "Create Inquiry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('inquiry_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/inquiries/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"customer_name\": \"Ali Hassan\", \"contact_number\": \"9876543210\", \"source_channel\": \"WHATSAPP\", \"event_type\": \"Wedding\", \"tentative_date\": \"2026-04-15\", \"notes\": \"Approx 300 guests\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Inquiry",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/inquiries/{{inquiry_id}}/"
+          }
+        },
+        {
+          "name": "Update Inquiry",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/inquiries/{{inquiry_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"notes\": \"Updated: 350 guests confirmed\"}"
+            }
+          }
+        },
+        {
+          "name": "Convert Inquiry to Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('event_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/inquiries/{{inquiry_id}}/convert/"
+          }
+        },
+        {
+          "name": "Delete Inquiry (soft)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/inquiries/{{inquiry_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Master - Ingredients",
+      "item": [
+        {
+          "name": "List Ingredients",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/ingredients/"
+          }
+        },
+        {
+          "name": "Create Ingredient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('ingredient_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/master/ingredients/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chicken\", \"category\": \"MEAT\", \"unit_of_measure\": \"kg\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Ingredient",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/ingredients/{{ingredient_id}}/"
+          }
+        },
+        {
+          "name": "Update Ingredient",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/master/ingredients/{{ingredient_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"base_qty_ref\": \"50.000\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Ingredient (soft)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/ingredients/{{ingredient_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Master - Dishes",
+      "item": [
+        {
+          "name": "List Dishes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/dishes/"
+          }
+        },
+        {
+          "name": "Create Dish",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('dish_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/master/dishes/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Chicken Biryani\", \"category\": \"Mains\", \"unit_type\": \"KG\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Dish",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/dishes/{{dish_id}}/"
+          }
+        },
+        {
+          "name": "Activate Dish (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/master/dishes/{{dish_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_active\": true}"
+            }
+          }
+        },
+        {
+          "name": "Get Dish Recipe",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/dishes/{{dish_id}}/recipe/"
+          }
+        },
+        {
+          "name": "Set Dish Recipe (PUT - replaces all lines)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/master/dishes/{{dish_id}}/recipe/",
+            "body": {
+              "mode": "raw",
+              "raw": "[{\"ingredient\": \"{{ingredient_id}}\", \"qty_per_unit\": \"0.500\", \"unit\": \"kg\"}]"
+            }
+          }
+        },
+        {
+          "name": "Delete Dish (soft)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/master/dishes/{{dish_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/"
+          }
+        },
+        {
+          "name": "Create Event",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('event_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"customer_name\": \"Ali Hassan\", \"contact_number\": \"9876543210\", \"event_type\": \"Wedding\", \"event_date\": \"2026-04-15\", \"event_time\": \"18:00:00\", \"venue\": \"Grand Hall, Kozhikode\", \"guest_count\": 300, \"service_type\": \"BUFFET\", \"notes\": \"Vegetarian menu preferred\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Event",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/{{event_id}}/"
+          }
+        },
+        {
+          "name": "Update Event (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/{{event_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"guest_count\": 350, \"venue\": \"Royal Gardens\"}"
+            }
+          }
+        },
+        {
+          "name": "Transition - DRAFT to CONFIRMED",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/{{event_id}}/transition/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"CONFIRMED\"}"
+            }
+          }
+        },
+        {
+          "name": "Transition - CONFIRMED to IN_PROGRESS",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/{{event_id}}/transition/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"IN_PROGRESS\"}"
+            }
+          }
+        },
+        {
+          "name": "Transition - Invalid (expect 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/{{event_id}}/transition/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"DRAFT\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Event (soft)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/{{event_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu Items (nested under Event)",
+      "item": [
+        {
+          "name": "List Menu Items",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/{{event_id}}/menu-items/"
+          }
+        },
+        {
+          "name": "Add Dish to Menu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('menu_item_id', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/{{event_id}}/menu-items/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"dish\": \"{{dish_id}}\", \"quantity\": \"100.00\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Menu Item",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/{{event_id}}/menu-items/{{menu_item_id}}/"
+          }
+        },
+        {
+          "name": "Update Menu Item Quantity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": "{{base_url}}/api/events/{{event_id}}/menu-items/{{menu_item_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"quantity\": \"150.00\"}"
+            }
+          }
+        },
+        {
+          "name": "View Calculated Ingredients",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/{{event_id}}/menu-items/ingredients/"
+          }
+        },
+        {
+          "name": "View Ingredients - Filter by Category",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/events/{{event_id}}/menu-items/ingredients/?categories=MEAT,GROCERY",
+              "query": [{ "key": "categories", "value": "MEAT,GROCERY" }]
+            }
+          }
+        },
+        {
+          "name": "Remove Dish from Menu (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/events/{{event_id}}/menu-items/{{menu_item_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Engine - Ingredients (read-only)",
+      "item": [
+        {
+          "name": "List All Event Ingredients",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{base_url}}/api/engine/ingredients/"
+          }
+        },
+        {
+          "name": "Filter by Event",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/engine/ingredients/?event={{event_id}}",
+              "query": [{ "key": "event", "value": "{{event_id}}" }]
+            }
+          }
+        },
+        {
+          "name": "Filter by Category",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/engine/ingredients/?category=MEAT",
+              "query": [{ "key": "category", "value": "MEAT" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
