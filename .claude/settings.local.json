@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx shadcn@latest add button input label badge card table dialog select dropdown-menu tabs avatar separator skeleton sonner --yes)",
+      "Bash(DJANGO_SETTINGS_MODULE=config.settings.development python -c \"from apps.inquiries.views import InquiryViewSet; print\\(''OK''\\)\")"
+    ]
+  }
+}
