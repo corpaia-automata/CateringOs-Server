@@ -96,3 +96,53 @@ class AggregationTest(TestCase):
         self.assertEqual(ei.unit, 'kg')
         self.assertEqual(ei.ingredient_name, 'Salt')
         self.assertEqual(ei.category, 'GROCERY')
+
+
+class MixedUnitAggregationTest(TestCase):
+
+    def test_same_ingredient_in_different_units_creates_separate_totals(self):
+        paneer = Ingredient.objects.create(
+            name='Paneer',
+            category='GROCERY',
+            unit_of_measure='kg',
+        )
+        skewers = Dish.objects.create(
+            name='Paneer Skewers',
+            category='Starters',
+            unit_type='PLATE',
+        )
+        garnish = Dish.objects.create(
+            name='Paneer Garnish',
+            category='Add-on',
+            unit_type='PLATE',
+        )
+        DishRecipe.objects.create(
+            dish=skewers,
+            ingredient=paneer,
+            qty_per_unit=Decimal('500'),
+            unit='g',
+        )
+        DishRecipe.objects.create(
+            dish=garnish,
+            ingredient=paneer,
+            qty_per_unit=Decimal('2'),
+            unit='piece',
+        )
+        event = Event.objects.create(
+            customer_name='Mixed Units Client',
+            guest_count=50,
+            service_type='BUFFET',
+        )
+
+        EventMenuItem.objects.create(event=event, dish=skewers, quantity=Decimal('2'))
+        EventMenuItem.objects.create(event=event, dish=garnish, quantity=Decimal('3'))
+
+        totals = {
+            row.unit: row.total_quantity
+            for row in EventIngredient.objects.filter(event=event, ingredient=paneer)
+        }
+
+        self.assertEqual(totals, {
+            'kg': Decimal('1.0000'),
+            'piece': Decimal('6.0000'),
+        })

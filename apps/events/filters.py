@@ -4,6 +4,8 @@ from .models import Event
 
 
 class EventFilter(django_filters.FilterSet):
+    event_date_from   = django_filters.DateFilter(field_name='event_date', lookup_expr='gte')
+    event_date_to     = django_filters.DateFilter(field_name='event_date', lookup_expr='lte')
     event_date_after  = django_filters.DateFilter(field_name='event_date', lookup_expr='gte')
     event_date_before = django_filters.DateFilter(field_name='event_date', lookup_expr='lte')
 

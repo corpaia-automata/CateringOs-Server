@@ -9,6 +9,14 @@ from .models import EventMenuItem
 class MenuService:
 
     @staticmethod
+    def ensure_menu_unlocked(event: Event) -> None:
+        if event.menu_locked:
+            raise ValidationError(
+                f'Menu is locked for event {event.event_code}. '
+                'Unlock the event before changing dishes.'
+            )
+
+    @staticmethod
     def add_dish(event_id, validated_data: dict) -> EventMenuItem:
         """
         Creates an EventMenuItem for the given event.
@@ -17,11 +25,7 @@ class MenuService:
         """
         event = get_object_or_404(Event, pk=event_id)
 
-        if event.menu_locked:
-            raise ValidationError(
-                f'Menu is locked for event {event.event_code}. '
-                'Unlock the event before adding dishes.'
-            )
+        MenuService.ensure_menu_unlocked(event)
 
         return EventMenuItem.objects.create(event=event, **validated_data)
 
@@ -31,4 +35,5 @@ class MenuService:
         Soft-deletes a menu item.
         post_save signal fires after soft_delete → CalculationEngine recalculates.
         """
+        MenuService.ensure_menu_unlocked(instance.event)
         instance.soft_delete()
