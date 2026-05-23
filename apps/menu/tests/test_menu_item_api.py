@@ -8,8 +8,7 @@ from rest_framework.test import APIClient
 from apps.engine.models import EventIngredient
 from apps.events.models import Event
 from apps.master.models import Dish, DishRecipe, Ingredient
-
-from .models import EventMenuItem
+from apps.menu.models import EventMenuItem
 
 
 class EventMenuItemUpdateTest(TestCase):

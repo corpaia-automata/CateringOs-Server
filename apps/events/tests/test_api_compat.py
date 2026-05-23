@@ -2,9 +2,9 @@ import datetime
 
 from django.test import TestCase
 
-from .filters import EventFilter
-from .models import Event
-from .serializers import EventSerializer
+from apps.events.filters import EventFilter
+from apps.events.models import Event
+from apps.events.serializers import EventSerializer
 
 
 class EventSerializerCompatibilityTest(TestCase):
