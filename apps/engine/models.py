@@ -27,7 +27,7 @@ class EventIngredient(models.Model):
 
     class Meta:
         db_table = 'event_ingredients'
-        unique_together = [('event', 'ingredient')]
+        unique_together = [('event', 'ingredient', 'unit')]
         indexes = [
             models.Index(fields=['event', 'category']),
         ]

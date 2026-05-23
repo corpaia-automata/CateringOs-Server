@@ -32,14 +32,32 @@ class EventMenuItem(BaseMixin):
         return f'{self.event} | {self.dish_name_snapshot or self.dish.name}'
 
     def save(self, *args, **kwargs):
-        # Freeze snapshots on first creation only (blank guards against re-freeze)
-        if not self.dish_name_snapshot:
+        should_refresh_snapshot = self._should_refresh_snapshot()
+        if should_refresh_snapshot or not self.dish_name_snapshot:
             self.dish_name_snapshot = self.dish.name
-        if not self.unit_type_snapshot:
+        if should_refresh_snapshot or not self.unit_type_snapshot:
             self.unit_type_snapshot = self.dish.unit_type
-        if not self.recipe_snapshot:
+        if should_refresh_snapshot or not self.recipe_snapshot:
             self.recipe_snapshot = self._build_recipe_snapshot()
+        if should_refresh_snapshot and kwargs.get('update_fields') is not None:
+            kwargs['update_fields'] = set(kwargs['update_fields']) | {
+                'dish_name_snapshot',
+                'unit_type_snapshot',
+                'recipe_snapshot',
+            }
         super().save(*args, **kwargs)
+
+    def _should_refresh_snapshot(self) -> bool:
+        if not self.pk:
+            return True
+
+        current = (
+            EventMenuItem.all_objects
+            .filter(pk=self.pk)
+            .values('dish_id')
+            .first()
+        )
+        return bool(current and current['dish_id'] != self.dish_id)
 
     def _build_recipe_snapshot(self) -> list:
         return [

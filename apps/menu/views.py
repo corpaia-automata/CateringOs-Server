@@ -41,8 +41,18 @@ class EventMenuItemViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    def perform_update(self, serializer):
+        try:
+            MenuService.ensure_menu_unlocked(serializer.instance.event)
+        except ValidationError as exc:
+            raise DRFValidationError(exc.message)
+        serializer.save()
+
     def perform_destroy(self, instance):
-        MenuService.remove_dish(instance)
+        try:
+            MenuService.remove_dish(instance)
+        except ValidationError as exc:
+            raise DRFValidationError(exc.message)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
