@@ -5,7 +5,7 @@ from .models import Event
 
 class EventSerializer(serializers.ModelSerializer):
     # Frontend uses client_name / event_name / event_id — map to model fields
-    client_name = serializers.CharField(source='customer_name')
+    client_name = serializers.CharField(source='customer_name', required=False)
     event_name  = serializers.CharField(source='customer_name', read_only=True)
     event_id    = serializers.CharField(source='event_code', read_only=True)
 
@@ -25,10 +25,10 @@ class EventSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             'id', 'event_code', 'event_id', 'event_name',
-            'customer_name',  # client_name is the writable alias
             'menu_locked', 'created_at', 'updated_at',
         )
         extra_kwargs = {
+            'customer_name':           {'required': False},
             'contact_number':         {'required': False, 'default': ''},
             'event_time':             {'required': False, 'allow_null': True},
             'event_date':             {'required': False, 'allow_null': True},
@@ -40,6 +40,14 @@ class EventSerializer(serializers.ModelSerializer):
             'total_amount':           {'required': False},
             'advance_amount':         {'required': False},
         }
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if self.instance is None and not attrs.get('customer_name'):
+            raise serializers.ValidationError({
+                'customer_name': 'This field is required.',
+            })
+        return attrs
 
 
 class EventTransitionSerializer(serializers.Serializer):
